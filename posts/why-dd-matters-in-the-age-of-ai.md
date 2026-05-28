@@ -1,3 +1,7 @@
+# Why DDD Matters More in the Age of AI-Generated Code
+
+Generated code is cheap. Domain clarity is scarce.
+
 * * *
 
 AI has changed something for me personally.
