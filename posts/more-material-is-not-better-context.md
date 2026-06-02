@@ -1,6 +1,6 @@
 # More Material Is Not Better Context
 
-I keep noticing how natural it feels to solve AI problems by adding more input and trying to explain things better to the model.
+I keep noticing how natural it feels to solve problems with AI by adding more input and trying to explain things better to the model.
 
 If the answer is weak, add the missing file. If the design looks shallow, add more documentation. If the model gets the behavior wrong, paste in the ticket or the API schema.
 
@@ -8,8 +8,7 @@ I used to do this too, but it didn't seeem to help.
 
 There is a point where the model behaviour becomes suspicious. The prompt gets larger, the retrieval gets broader, and the answer still feels slightly off. Not obviously wrong. Just too smooth. Too willing to connect things that people in the domain would keep apart.
 
-Maybe the AI did not need more material. Maybe it needed a smaller world.
-
+Maybe the AI did not need more material. Maybe it needed a smaller, cleaner world.
 
 ## When words travel too freely
 
@@ -24,7 +23,6 @@ People usually know this, at least informally. They hesitate. They ask, “Which
 AI does not hesitate in the same way. If the material mixes several meanings of the same word, the answer may calmly use them as if they belonged together.
 
 The output can look coherent while the model underneath has become weaker.
-
 
 ## Ubiquitous language gives AI something to follow
 
@@ -44,7 +42,6 @@ But only if we give it a language worth following.
 
 Otherwise it will also be consistent with the wrong thing.
 
-
 ## Language needs a place
 
 Ubiquitous language does not work well as a company-wide vocabulary and that's why it's always context specific.
@@ -60,7 +57,6 @@ Outside that context, the same word may need translation.
 This feels especially important with AI because AI tends to remove friction from language. It can make rough ideas sound finished. It can make two similar concepts sound identical. It can bridge gaps that should have remained visible.
 
 Sometimes we need the boundary to stay visible.
-
 
 ## Better context shows how meaning moves
 
@@ -80,8 +76,6 @@ The boundary still got weaker.
 
 A better AI context says: work with this internal language, publish through these contracts, treat these external concepts as translated input, and do not collapse them just because the structures look similar. Make sure the model understands what belongs to the context and what doesn't.
 
-
-
 ## The quieter failure
 
 Hallucination gets most of the attention. I am more worried about a quieter failure.
@@ -92,10 +86,9 @@ It can read real code, real documentation, real schemas, and real examples. Then
 
 Just a small weakening of the language.
 
-These mistakes are harder to spot because they look productive. There is a pull request. There are tests. There is a tidy explanation.
+These mistakes are harder to spot because they look productive. There is a pull request. There are tests. There is a tidy explanation and a summary of the changes done.
 
 The damage shows up later, when the next change becomes harder to reason about.
-
 
 ## Designing context
 
@@ -111,4 +104,7 @@ A bounded context gives AI a smaller world.
 
 Ubiquitous language gives that world words it can use consistently.
 
+The work for us is to make sure those words still belong to the people who understand the domain.
+
+The work for us is to make sure those words still belong to the people who understand the domain.
 The work for us is to make sure those words still belong to the people who understand the domain.
