@@ -1,153 +1,135 @@
 # Why DDD Matters More in the Age of AI-Generated Code
 
-Generated code is cheap. Domain clarity is scarce.
+Much of the discussion I notice around AI-assisted development quickly turns to productivity. Generated code, completed tasks and agent autonomy are relatively easy things to demonstrate.
 
-* * *
+I am not sure they tell us much about productivity.
 
-AI has changed something for me personally.
+If the software solves the wrong problem, producing it faster does not help. At best, those measures tell us that implementation got faster. Whether the work was useful is much harder to see.
 
-For the first time in a while, software feels more like creating again. Not just typing code, debugging strange edge cases, wiring things together, and slowly pushing tickets forward. With AI, I can move from an idea to something visible much faster. I can test a thought, generate a rough implementation, throw it away, try another angle, and shape the result into something useful.
+Still, AI has changed something for me personally.
+
+For the first time in a while, software feels more like creating again. I can start with an idea and get to something tangible quickly. I can try one implementation, throw it away, explore another direction and spend more of my time shaping the thing I am trying to build.
 
 That has brought back some of the spark that made software interesting to me in the first place.
 
-Maybe that is a strange way to start a post about Domain-Driven Design. But it is also why I have become more interested in DDD again.
+I like that change.
 
-The more useful AI becomes, the more I worry about what we are asking it to amplify.
+It has also made me more interested in Domain-Driven Design again.
 
-AI can generate code faster than most organizations can understand what they are actually trying to build. That is a great capability when the thinking is clear. It is a problem when the thinking is vague.
+## Faster implementation can hide weaker thinking
 
-The risk is not only that AI writes bad code. Bad code can be found, reviewed, tested, rewritten. The harder problem is when AI turns ambiguous thinking into a working system.
+When implementation was slower, there was some natural friction in turning an idea into software.
 
-A vague idea becomes a service. A misunderstood rule becomes an API. A weak assumption spreads into enough artifacts that it starts to look established. The code, tests, documentation, and contracts may all agree with each other and still be wrong about the domain.
+That friction was hardly a virtue. I do not miss spending hours writing repetitive code or debugging problems that a tool can now solve in seconds. Removing that work is one of the reasons I enjoy using AI.
 
-This is the reason I keep coming back to Domain-Driven Design. Not because every system needs more patterns. Not because I think DDD is some kind of silver bullet. Mostly because DDD gives us ways to be more precise about *meaning* before we scale implementation.
+But friction had a side effect. Turning an unclear idea into a large amount of working software took time.
 
-It slows down the parts that should probably be slower: language, ownership, boundaries, and assumptions. These things feel more important when implementation gets faster.
+AI reduces that delay.
 
-## The bottleneck has moved
+I can give an AI assistant an idea that is still poorly formed and get something surprisingly complete back. It can produce code, tests and supporting documentation that agree with each other. The result can look coherent very quickly.
 
-A lot of the AI discussion in software uses the language of productivity. I understand why, but I think the word is often used too casually.
+That coherence can be misleading.
 
-It is easy to count generated lines of code, completed tasks, removed boilerplate, or how much an AI agent can do without human help. Those things may tell us something about output, but they do not tell us much about whether the work was useful.
+A misunderstood business rule can still be implemented cleanly. A vague concept can have a good API. Tests can prove that the implementation behaves exactly as specified while the specification itself is based on the wrong understanding.
 
-Software productivity is only real if we are building the right thing, or at least learning faster what the right thing might be. Otherwise we are just producing more artifacts around the same uncertainty.
+The uncomfortable part for me is that AI can make a weak assumption look established much faster than before.
 
-In many real systems, the painful problems are not caused by slow typing. They come from unclear concepts, vague ownership, overloaded words, and software that no longer matches how the business works. AI does not automatically fix that. Sometimes it makes it easier to hide the problem under more output.
+This does not make AI the problem. The unclear thinking was already there. AI simply gives it more reach.
 
-If the domain is unclear, AI can still generate code. If the boundaries are wrong, AI can still generate code. If two teams use the same word to mean different things, AI can still generate code.
+## The bottleneck moves towards understanding
 
-And the generated code may look fine. It may compile, have tests, and follow common patterns. None of that guarantees that it represents the right business concept.
+In the systems I work with, the difficult problems are rarely caused by an inability to write enough code.
 
-This problem existed before AI. AI just removes some of the friction that used to slow it down.
+They tend to appear around meaning.
 
-## Weak models spread faster now
+A concept means one thing to one part of the business and something slightly different somewhere else. Ownership is unclear. A rule that looked simple turns out to have an exception nobody mentioned. Software gradually stops matching how the business actually works.
 
-Weak domain models have always caused problems. They show up as confusing integrations, surprising edge cases, and long arguments about what a word actually means.
+Those problems existed long before generative AI.
 
-Before AI, these problems often spread more slowly. A workaround took effort. An integration took effort. A local interpretation of a rule had to be implemented by someone, usually after some discussion and delay.
+They also do not disappear when implementation becomes cheaper.
 
-Now a weak model can spread into more artifacts in less time: APIs, tests, generated clients, documentation. All of it can appear quickly. All of it can make the model feel more real than it deserves to be.
+If anything, I think they become more visible as the limiting factor. Once I can produce a reasonable implementation quickly, I spend proportionally more time deciding what the implementation should actually mean.
 
-This is the part I find uncomfortable: AI increases the importance of architectural judgment because it reduces the friction of implementation. The easier it becomes to create software, the more important it becomes to decide what software should exist.
+That is where my thinking has shifted.
 
-That decision depends on domain understanding.
+I used to think of the expensive part of software largely in terms of implementation effort. Increasingly, the scarce part seems to be a sufficiently clear understanding of the domain to know what should be implemented.
 
-What is this concept called? Who owns it? What does it mean in this context? What should other parts of the system be allowed to know? What should remain private?
+I cannot measure that shift neatly, and I am wary of pretending that I can. It is an observation from using these tools in real development work.
 
-These are DDD questions, even if we do not call them that.
+The code has become easier to produce. The difficult conversations have not.
 
-## DDD helps us learn from the domain
+## DDD gives the model somewhere to come from
 
-For a long time, I thought about DDD mainly as a way to design better software models. I still think that is true, but it feels incomplete.
+For a long time, I thought about DDD mainly as a way to design better software models.
 
-DDD is sometimes presented as if the goal is to design the correct model and then implement it. Real domains rarely work like that. We discover them through conversations, edge cases, usage, incidents, and business change.
+I still think that is true, but it feels incomplete now.
 
-A domain model is not just a diagram or a set of classes. It is a working theory about how part of the world behaves. And like any theory, it improves when it meets reality.
+A domain model is also a record of what we currently understand about part of the business. It gives names to concepts, makes rules explicit and forces decisions about where something belongs.
 
-This is probably the part of DDD that interests me most right now. AI can help us move faster, but speed alone is not much of a strategy. I want the learning loop to become faster: create a model, test it against reality, notice where it fails, and improve it.
+That understanding is never finished.
 
-DDD gives that loop some structure. We model part of the domain. We make language and boundaries explicit. We observe where the model fits reality and where it breaks. Then we refine the model.
+Real domains keep exposing things the model did not account for. An edge case appears. Someone from the business uses a word differently than the development team. A production incident reveals an assumption that was never really true.
 
-AI can help with pieces of that work. It can summarize domain conversations, compare code against documentation, and help explore alternative models. That is useful. But it still needs a meaningful frame.
+The model changes as we learn.
 
-Without that frame, AI is powerful but directionless. With a good frame, it has a smaller and more meaningful world to work inside.
+I find this side of DDD more interesting in the context of AI than the usual discussion about tactical patterns. Aggregates, entities and value objects still have their place, but they are downstream of something more important: learning enough about the domain to create a useful model of it.
 
-## DDD is more than tactical patterns
+AI can make that learning loop faster as well.
 
-When people hear Domain-Driven Design, they often think about aggregates, entities, value objects, repositories, domain services, and layered architecture. Those patterns can be useful, but they are not the part I am focusing on here.
+I already use it to explore ideas, challenge an implementation and make connections across information that would take longer to work through manually. Sometimes that exposes a gap in my thinking before I have written much code.
 
-The more important part is alignment between software and domain understanding.
+Other times it confidently reinforces the assumption I started with.
 
-DDD asks us to take the business seriously as a design input. It asks us to model language, boundaries, behavior, and ownership. It asks us to notice when the same word means different things in different contexts.
+That difference matters.
 
-That matters when AI enters the development process. AI can generate code inside a model, suggest implementations, and help explain existing logic. But it needs boundaries around meaning.
+The useful loop is not simply idea to generated code. It is understanding to model to software, followed by whatever reality teaches us next.
 
-A bounded context gives it those boundaries.
+DDD gives that loop some structure.
 
-Inside this boundary, these words mean this. These rules belong here. This model is owned by this team. Other contexts should not reach directly into the internal model; they interact through contracts, events, or published representations.
+## Boundaries matter when AI has access to everything
 
-For me, that is the practical value. The words, rules, and ownership are not floating around the system anymore. They have a place, a context.
+There is another effect I have noticed when working with AI. My first instinct when it lacks context is usually to give it more.
 
-## AI needs narrower context, not just more files
+More code. More documentation. More instructions.
 
-One common reaction to AI limitations is to add more context to the prompt. I have done this myself: more documents, more code, more instructions.
+Sometimes that works.
 
-Sometimes it helps. It can also make things worse.
+Eventually, though, more material starts mixing things that should probably remain separate. Different parts of a system have different models, different language and sometimes different meanings for the same word.
 
-A large pile of mixed information can confuse humans, and it can confuse AI. If the information mixes business meanings, deprecated APIs, and conflicting terminology, the AI may produce an answer that sounds coherent but blends concepts that should remain separate.
+This is where bounded contexts have started to look useful to me in a slightly different way.
 
-This is the part of DDD that now feels surprisingly practical for AI: bounded contexts narrow the relevant world.
+A bounded context already tells us that a model and its language are valid within a particular boundary. The meaning does not need to apply everywhere.
 
-They tell both humans and AI which part of the domain we are working in, which concepts matter here, what the words mean, and which contracts connect this context to others.
+That is useful for people designing software, and I suspect it is equally useful when deciding what information an AI assistant should reason over.
 
-That narrower context is not a limitation. It is what makes useful reasoning possible. An AI assistant working inside a clear bounded context has a better chance of producing useful output than one pointed at a large, mixed, inconsistent repository and asked to “understand the system”.
+The value is quite practical. Words, rules and ownership are no longer floating around the whole system. They have a place, a context.
 
-A bounded context gives an AI assistant a smaller world to reason about. Often that is more valuable than simply giving it more files.
+I do not yet know whether a bounded context maps neatly to the ideal context for an AI assistant. It probably does not in every case. But giving an AI a smaller, coherent part of the domain seems more promising than continually adding material and hoping it can work out which parts belong together.
 
-## Design still matters
+There is more to unpack there, especially around ubiquitous language, contracts and sources of truth. I want to leave that for later rather than squeeze the whole argument into this post.
 
-There is a tempting story that AI will eventually remove the need for much of software design. We describe what we want, and the system builds it.
+## Cheaper code makes domain clarity more valuable
 
-I do not think that is the right mental model.
+I do not think AI reduces the need for software design.
 
-Even if AI becomes much better at implementation, someone still has to frame the problem, define the boundaries, choose the language, and create feedback loops so the model can evolve when reality proves it wrong.
+My experience so far points in the other direction.
 
-That work becomes more important as implementation gets easier.
+As implementation becomes easier, more of my attention moves towards the assumptions behind it. I care more about whether the concept is understood, whether the language is shared and whether the model belongs inside the boundary where I am changing it.
 
-This does not mean architects should sit in a room producing big models before anyone writes code. Domain understanding improves through conversation, delivery, observation, and correction.
+DDD already gives us ways to work with those problems.
 
-AI can participate in that work. It can summarize conversations, extract concepts from code, and help teams see where boundaries are being violated.
+That does not mean DDD somehow solves AI-assisted development. I am not convinced there is a single method that does. Some DDD practices will probably turn out to be more useful in this setting than others.
 
-Humans still need to decide what the model should mean. The domain comes from the business, the users, the constraints, the edge cases, and the people who live with the consequences of the system.
+What feels increasingly clear to me is that generating more software is not the interesting problem.
 
-## Domain-Driven AI
+The interesting part is keeping that software connected to an understanding of the domain that can still change as we learn.
 
-That is the idea behind this series.
+AI has made creating software enjoyable for me again. I would rather use that new speed to shorten the path between an idea and learning whether the idea was any good than simply increase the amount of software I can produce.
 
-I am writing it partly to clarify my own thinking. AI is moving quickly, and it is easy to get pulled into tool discussions and impressive demos. I want to keep asking a more basic design question: how do we keep software grounded in the domain when generating software becomes easier?
+That is the direction I want to explore with Domain-Driven AI.
 
-Domain-Driven AI is not a new methodology. At least I do not see it that way. It is a way of looking at AI-assisted software development through a DDD lens.
+I am still unsure what the right boundaries for AI-assisted development will look like in practice. A bounded context designed for a software system may not automatically be the right unit of context for an AI assistant.
 
-The basic thesis is simple: as AI makes software cheaper to generate, domain understanding becomes the scarce resource.
+But as implementation gets cheaper, I find myself caring more about the quality of the domain model and the boundaries around it.
 
-If we want AI to help us build better systems, we need to give it better structures to work within: better boundaries, better language, better ownership, and better feedback loops.
-
-DDD gives us many of those structures. It helps us avoid treating AI as a magic code generator operating over an undefined problem space. It helps us place AI inside bounded contexts, published contracts, domain language, and explicit models of ownership.
-
-That is where AI becomes useful in a more interesting way. It is not only about generating more code. It is about helping us create software that remains understandable, adaptable, and grounded in the real-world domain it is supposed to serve.
-
-## When implementation gets cheaper, context becomes the constraint
-
-This is the shift I want to explore, not as a finished theory, but as a working line of thought.
-
-If code becomes cheaper, we should become more careful about context.
-
-Before we generate implementation, we should ask what domain we are in, what the concept means here, who owns the decision, what assumptions we are encoding, and how we will know if the model is wrong.
-
-Those questions decide whether AI-assisted development produces useful systems or just accelerates accidental complexity.
-
-That is why DDD matters more now. AI is powerful enough to make weak models dangerous, and that means our models, boundaries, and language deserve more attention, not less.
-
-* * *
-
-This is the first post in the **Domain-Driven AI** series. Next, I want to look more closely at the idea of context itself: why giving AI more material is not always the same as giving it better context, and how DDD’s idea of bounded context might help us work with AI more deliberately
+The next part of the problem starts there: how much context actually helps, and when does more material simply become noise?
