@@ -1,110 +1,89 @@
 # More Material Is Not Better Context
 
-I keep noticing how natural it feels to solve problems with AI by adding more input and trying to explain things better to the model.
+Most discussions about context for AI-assisted development focus on how to give the model more relevant material. Larger context windows help. Better retrieval helps. So does adding the file, ticket or schema that explains the missing detail.
 
-If the answer is weak, add the missing file. If the design looks shallow, add more documentation. If the model gets the behavior wrong, paste in the ticket or the API schema.
+I have approached the problem in exactly that way. When an answer was weak, I added more input. When a design looked shallow, I added more documentation. When the model misunderstood the behaviour, I pasted in the implementation or the API contract.
 
-I used to do this too, but it didn't seeem to help.
+Sometimes that fixed the problem.
 
-There is a point where the model behaviour becomes suspicious. The prompt gets larger, the retrieval gets broader, and the answer still feels slightly off. Not obviously wrong. Just too smooth. Too willing to connect things that people in the domain would keep apart.
+But I also reached a point where the prompt kept growing and the answer still felt wrong. It was not obviously wrong. The model had used real material and produced a tidy explanation. It had simply connected things that people working in the domain would normally keep apart.
 
-Maybe the AI did not need more material. Maybe it needed a smaller, cleaner world.
+At that point, adding another document was treating the wrong problem. The material already contained enough detail. What it lacked was a clear boundary around the meanings inside it.
 
-## When words travel too freely
+## More input can weaken the answer
 
-Software systems are full of familiar words like "Customer", "Order", "Product" or "Account".
+Adding material is a sensible response when the model lacks a fact. If it has not seen a business rule, it cannot reliably account for that rule. If it has not seen an interface, it has to guess how another system behaves.
 
-They look harmless because everyone recognizes them. But most systems I have worked with do not have one clean meaning for these words.
+The problem starts when relevant material comes from several different models.
 
-A customer in one part of the business may be the person who pays. Somewhere else it may be the person receiving the goods. In another place it may be a profile in a loyalty system.
+A ticket may use the language of the business process. The implementation may use names inherited from an old database. An API schema may describe the same situation from the perspective of another system. Each source can be correct within its own setting.
 
-People usually know this, at least informally. They hesitate. They ask, “Which customer do you mean?” They have learned where the traps are.
+Put them together without those settings, and the AI has to resolve the differences by itself. It tends to do that smoothly. Similar names become the same concept. Similar structures become interchangeable. Missing translations disappear into a plausible answer.
 
-AI does not hesitate in the same way. If the material mixes several meanings of the same word, the answer may calmly use them as if they belonged together.
+I had given the model better coverage of the system, but less certainty about what each part meant.
 
-The output can look coherent while the model underneath has become weaker.
+## Shared words hide different models
 
-## Ubiquitous language gives AI something to follow
+Software systems are full of familiar words such as “Customer”, “Order”, “Product” and “Account”. They look safe because everyone recognises them.
 
-This is where I keep coming back to ubiquitous language.
+In most systems I have worked with, these words do not have one clean meaning.
 
-Not as a DDD slogan or a glossary. It has a more significant purpose.
+A customer may be the person who pays. In another part of the business, it may be the person receiving the goods. Somewhere else, it may mean a profile in a loyalty system. None of these meanings is necessarily wrong.
 
-The useful part of ubiquitous language is that it shows up in the work. In conversations, code, tests, examples, commands, events, and documentation. The same words keep appearing because people are trying to make the model visible.
+People who know the domain have learned where the ambiguity lives. They hesitate or ask which customer is being discussed. Sometimes they get it wrong too, but the uncertainty is at least visible.
 
-For AI, this can be and is powerful.
+AI does not bring that history into the conversation unless the context contains it. When several meanings appear in the supplied material, the model may use them as though they belong together. The result reads coherently even when the underlying model does not.
 
-AI is often better at consistency than people are, once the language is clear. People take shortcuts. We keep old names around because renaming is annoying. We borrow terms from APIs, database tables, and earlier projects.
+That is the failure I had been trying to fix by adding more input.
 
-AI can help clean some of that up. It can keep generated tests aligned with the domain language. It can notice when documentation and code are drifting. It can suggest names that fit the model better than the technical names we accidentally kept.
+## A local language gives AI something to follow
 
-But only if we give it a language worth following.
+This brought me back to ubiquitous language.
 
-Otherwise it will also be consistent with the wrong thing.
+I do not find it useful as a glossary maintained beside the actual work. Its value comes from appearing in conversations, code, tests, examples, commands, events and documentation. The same words recur because the team is trying to express the same model.
 
-## Language needs a place
+That gives AI a pattern it can follow. Once the language is clear, AI can be more consistent than people are. People keep old names because changing them is inconvenient. We borrow terminology from database tables, vendor APIs and previous projects. Over time, the model becomes harder to see in the code.
 
-Ubiquitous language does not work well as a company-wide vocabulary and that's why it's always context specific.
+AI can help expose that drift. It can notice when documentation and code use different terms. It can keep generated tests aligned with the domain language. It can suggest a domain name where a technical name has survived by accident.
 
-Complex domains usually have several local languages that overlap, collide, and evolve. The same word can have different useful meanings in different parts of the business. Sometimes that is a problem. Sometimes it is just reality.
+There is a cost to that consistency. AI will also repeat a poor language with great discipline. If the supplied material mixes several models, the model can make that mixture look deliberate.
 
-A bounded context gives the language somewhere to live.
+I started to see that consistency as conditional. It helps only when the language supplied to the model is clear.
 
-Inside one context, a word can become precise enough to use in code. The rules around it can be tested. The commands and events can use it. The business can recognize it. The team can change it when they learn more.
+## The boundary must survive the prompt
 
-Outside that context, the same word may need translation.
+Ubiquitous language has always been local. Complex organisations contain several languages that overlap, collide and change at different speeds. A company-wide vocabulary rarely removes that reality.
 
-This feels especially important with AI because AI tends to remove friction from language. It can make rough ideas sound finished. It can make two similar concepts sound identical. It can bridge gaps that should have remained visible.
+A bounded context gives one of those languages somewhere to live. Inside the context, a word can become precise enough to use in code. Its rules can be tested. Commands and events can express it. The team can adjust the model when its understanding changes.
 
-Sometimes we need the boundary to stay visible.
+Outside the context, the same word may need a different meaning. The crossing requires translation.
 
-## Better context shows how meaning moves
+AI makes that translation easy to skip. If an upstream event already contains fields that look useful, the quickest solution is often to reuse its structure as the local model. The code is shorter and the mapping disappears. That may be a defensible choice for a simple integration, but it also lets an external model decide how the local domain is expressed.
 
-A practical bounded context already gives us clues about what AI should know.
+The same thing can happen in the other direction when an internal model is exposed directly as a public contract. AI is good at copying structures, and copying removes the friction that might otherwise make the boundary visible.
 
-The internal model shows how the context thinks about its own domain. The contracts show what the context exposes to others. The external models show how the context interprets things owned elsewhere.
+A useful context therefore needs more than relevant files. It needs to say which language is local, which concepts are owned elsewhere, and where translation is expected. The model should not have to infer the boundary from filenames and package structures.
 
-Those separations are useful because they stop everything from becoming one model.
+## Real material can still produce the wrong model
 
-An external event should not accidentally become the local domain model. A public contract should not simply mirror the internal model. A database shape should not decide the language of the business.
+Hallucination gets more attention because it is easier to recognise. An invented API or requirement can be checked and rejected.
 
-AI can blur these lines quickly because it is good at copying structure. If two things look similar, it may treat them as the same. If an upstream schema has the fields it needs, it may reuse it directly. If an internal model is convenient, it may expose it as a contract.
+Model blending is quieter.
 
-The code may compile. The explanation may sound reasonable.
+The AI can read real code, real documentation, real schemas and real examples. It can then combine them across a boundary that should have held. Nothing has been fabricated. There may be a pull request, passing tests and a clear summary of the change.
 
-The boundary still got weaker.
+The weakness appears later. The next change needs another exception. A local rule depends on an upstream representation. A familiar word now has two meanings in the same codebase. Each step was reasonable in isolation, but the model has become harder to reason about.
 
-A better AI context says: work with this internal language, publish through these contracts, treat these external concepts as translated input, and do not collapse them just because the structures look similar. Make sure the model understands what belongs to the context and what doesn't.
+I find this more worrying than an obviously bad answer. It looks like productive work while it is happening.
 
-## The quieter failure
+## A smaller world is often better context
 
-Hallucination gets most of the attention. I am more worried about a quieter failure.
+DDD gives me a practical way to think about AI context because it already deals with language, ownership and models that describe only part of the world.
 
-AI can use real material and still produce the wrong model.
+For work inside a bounded context, I want the AI to know the local language, the concepts owned there and the rules that protect them. It should see how the context communicates with its surroundings. It should also know which concepts belong elsewhere.
 
-It can read real code, real documentation, real schemas, and real examples. Then it combines them across a boundary that should have held. No invented API. No fake requirement. No obvious nonsense.
+I do not think every AI task will fit neatly inside one boundary. Architecture work, integration work and business processes often cross several of them. The crossing still needs to be explicit. The model should know when it is translating instead of quietly treating several languages as one.
 
-Just a small weakening of the language.
+I am not yet sure how much of this can be enforced through tooling and how much depends on teams keeping their models healthy. Contracts, evidence and ownership will all matter, but each raises a separate set of problems.
 
-These mistakes are harder to spot because they look productive. There is a pull request. There are tests. There is a tidy explanation and a summary of the changes done.
-
-The damage shows up later, when the next change becomes harder to reason about.
-
-## Designing context
-
-There has been a lot of talk about context management and I think DDD offers a really good framework for that.
-
-For a task inside a bounded context, I want the AI to know the local language, the concepts owned by the context, the rules that protect them, and the contracts used to communicate outward. I also want it to know what belongs elsewhere.
-
-DDD helps here because it has always cared about language, ownership, and models that reflect a part of the world. AI makes those concerns easier to ignore, because it can produce something plausible so quickly.
-
-But it also makes them more useful.
-
-A bounded context gives AI a smaller world.
-
-Ubiquitous language gives that world words it can use consistently.
-
-The work for us is to make sure those words still belong to the people who understand the domain.
-
-The work for us is to make sure those words still belong to the people who understand the domain.
-The work for us is to make sure those words still belong to the people who understand the domain.
+For now, when an AI answer feels smooth but slightly wrong, I no longer assume that the prompt is missing material. I first look for the boundary that the material has hidden.
