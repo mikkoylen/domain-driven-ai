@@ -1,119 +1,119 @@
 # AI Should Not Become the Source of Truth
 
-I keep running into the same uncomfortable moment when using AI in software work.
+Most discussion about AI-generated documentation focuses on accuracy. Can the model find the right information? Does it hallucinate? Can its answer be verified?
 
-You ask it to explain part of a system, and the answer is useful. It connects code, documentation, tests, and names that were spread across different places. It gives you something clearer than what you started with.
+Those concerns matter, but I have become more worried about a quieter failure.
 
-For a while, that feels like progress.
+I have repeatedly asked AI to explain part of a software system by reading its code, documentation and tests. The result is often useful. It connects details that were spread across several places and produces a clearer explanation than any single source provided.
 
-Then you notice the problem. The explanation is easier to read than the sources it came from. It is more coherent than the system itself. And because it is coherent, it starts to feel authoritative.
+At first, that feels like progress.
 
-That is the risk I think we need to take seriously. AI can make uncertain knowledge look settled.
+The discomfort comes later, when the explanation starts to feel more authoritative than the material behind it. It is coherent, easy to reuse and written with none of the uncertainty present in the system itself.
 
-## When explanations become too convenient
+AI can make unsettled knowledge look settled.
 
-Most teams already have gaps in their knowledge. Some rules live in code. Some are written down. Some are remembered by people. Some are only visible through behaviour.
+## A coherent answer can acquire authority
 
-AI is good at smoothing that into a readable answer.
+Most teams already have gaps in their shared knowledge.
 
-Suppose it explains that an order can be cancelled before payment is captured. That may be correct. It may also be a conclusion drawn from the current implementation, rather than a rule the business has named and agreed on. The difference matters, but it is easy to miss when the answer sounds confident.
+Some rules are written down. Others are enforced in code or captured indirectly in tests. A few are remembered by people who have worked with the system long enough to know its history. Some are visible only through the way the system behaves.
 
-This is how generated text quietly gains authority. Someone uses the explanation in a discussion. Later it appears in a document. Then it becomes part of the material for another piece of work. Nobody decided that AI should define the rule. The generated explanation just became the easiest thing to reuse.
+AI is good at smoothing these fragments into a readable answer. That is part of what makes it useful.
 
-That is a weak foundation for design.
+Suppose an explanation says that an order can be cancelled until payment has been captured. The current implementation may support that claim. There may also be tests that expect the same behaviour.
 
-The important question is not only whether the answer sounds right. It is whether we know where the authority came from.
+Still, neither tells me whether this is an agreed business rule or simply how the implementation happens to work today.
 
-## Authority belongs somewhere
+That uncertainty is easy to lose once the explanation has been written cleanly. Someone reuses it in a design discussion. Later, it appears in documentation. The next person treats that document as input for another piece of work.
 
-This is where Domain-Driven Design matters, but in a very practical way.
+Nobody explicitly decided that AI should define the cancellation rule. Its explanation became authoritative because it was the easiest version to understand and reuse.
 
-A bounded context is a place where certain words and rules are allowed to mean something specific. If a context owns ordering, then the ordering context owns what cancellation means in that model. Other contexts may react to published facts, call an API, or keep a local projection, but they do not get to redefine the rule from the outside.
+The individual steps are reasonable. The authority emerges through accumulation.
 
-AI should be treated the same way.
+## Meaning still needs an owner
 
-It can help interpret the ordering context. It can point to where a rule seems to be implemented. It can draft a clearer explanation than the current documentation. But it should not become the thing that decides what cancellation means.
+This is where I find Domain-Driven Design useful in a very practical way.
 
-That authority has to stay with the owning context and the artifacts the team maintains deliberately. Otherwise the model starts moving into generated prose. The system may look documented, but the documentation is no longer anchored strongly enough to ownership.
+A bounded context gives particular words and rules a place where their meaning is owned. If the ordering context owns order cancellation, then the team responsible for that context must be able to say what cancellation means in its model.
 
-## Inference should be visible
+Other contexts may call its API, react to published events or maintain local projections. They can depend on what the ordering context publishes, but they should not redefine the rule from the outside.
 
-I do not think the answer is to make AI cautious to the point of being useless. Inference is valuable. A lot of the benefit comes from asking AI to connect things that are not already neatly connected.
+I think AI needs to work within the same boundary.
+
+It can interpret the ordering context. It can locate code that appears to enforce a rule and tests that demonstrate the current behaviour. It can also draft a clearer explanation than the team has written so far.
+
+What it cannot do is turn that interpretation into an owned domain rule by itself.
+
+If generated prose is allowed to carry that authority, the model starts drifting away from the context that is responsible for it. The system may appear better documented while its meaning becomes less clearly owned.
+
+## Generated documentation should expose its gaps
+
+I do not want AI to avoid inference. Much of its value comes from connecting information that was never organised for a single reader.
 
 The problem is hidden inference.
 
-When AI makes a statement about the domain, especially one that could affect design, it should show the status of that statement. Did it find the rule in an owned artifact, or did it infer it from surrounding evidence? If no clear source exists, it should say that.
+When AI makes a statement about the domain, I want the answer to show what supports it. A rule found in an owned contract has a different status from behaviour inferred from code. A conclusion drawn from a test is different again from something the model could not verify at all.
 
-That small distinction changes the output.
+The cancellation example could then be described more honestly:
 
-Instead of only saying how the system works, the answer can say that the behaviour appears to exist, but the source of the rule is unclear. That is not a worse answer. It is a more honest one. It gives the team something useful to act on.
+> Cancellation before payment capture appears to be supported by the current implementation and tests. No owned business rule confirming this constraint was found.
 
-Sometimes the best result of an AI session is not a better summary. It is the discovery that the system depends on knowledge nobody has properly owned.
+That answer is less polished, but more useful. It explains the observed behaviour without silently promoting it into a domain decision.
 
-## Make the gaps part of the document
+I have started asking for this explicitly when generating documentation:
 
-This also changes how I ask AI to generate documentation.
+> Require evidence for important claims. Mark unknowns as TBD instead of filling the gap. Highlight places where a decision or more clarity is needed. Ask when the source material is not sufficient.
 
-I try not to ask only for a clean explanation. A clean explanation is often exactly what hides the problem. I want the output to show where the explanation came from, and where the source material is weak.
+This makes the document look less finished. It may contain unresolved questions, missing decisions and awkward contradictions.
 
-The instructions can be simple:
+That is a fair cost. Those gaps were already part of the system. The generated document has only made them visible.
 
-> Require evidence for important claims. Mark unknowns as TBD instead of filling the gap. Highlight places where a decision or more clarity is needed. Ask if the source material is not enough.
+Sometimes that is the most valuable result of the work. Instead of producing a smoother summary, AI reveals that an important rule has no clear owner or authoritative source.
 
-Those rules change the purpose of the generated document. It is no longer just a summary of what the system seems to do. It also becomes a map of what the system has failed to make clear.
-
-That is useful for the person reading it. While reviewing the generated documentation, they learn more about the system, but they also see where their understanding rests on weak evidence. The missing pieces become visible enough to discuss and fix.
-
-I think this is one of the better uses of AI in documentation work. It can help produce the explanation, but it can also help expose the gaps behind the explanation.
-
-A good generated document should contain both parts: what appears to be known, and what still needs to be clarified.
-
-Without the missing pieces, the document may look better, but the system has not actually become better understood.
-
-## Generated material needs somewhere to land
-
-There is still a line we need to hold.
+## Drafts need somewhere to land
 
 Generated material should remain provisional until it moves into an owned place.
 
-An AI-generated explanation can become documentation, but only after someone decides that it is documentation. A generated schema can become a contract, but only after the owning context publishes it as one. An architecture note can become a decision record, but not while it is still just text from a chat session.
+An AI-generated explanation can become documentation after someone responsible for the context reviews and publishes it. Until then, it is a draft based on the evidence that happened to be available.
 
-That may sound obvious, but in practice this boundary is easy to blur. AI makes draft artifacts cheap, and cheap artifacts spread. The more useful they are, the more likely they are to be reused before their status is clear.
+The same applies to generated schemas. A schema becomes a contract when the owning context accepts it, publishes it and takes responsibility for changing it. Text produced in a chat session has none of those properties on its own.
 
-This is not a reason to avoid generating them. It is a reason to be stricter about what they are allowed to become.
+This boundary is easy to blur because AI makes plausible artefacts cheap. A useful draft can spread through tickets, chat messages and design documents before anyone has decided what status it should have.
 
-A draft can be loose. A source of truth cannot.
+Avoiding generated artefacts would throw away much of the benefit. I would rather make their transition into owned material explicit.
 
-## The source of truth should be less impressive
+A draft can tolerate uncertainty. A source of truth has to make that uncertainty visible or resolve it.
 
-There is something unglamorous about a good source of truth. It is often not the nicest explanation. It may be a contract, a test, a policy, a decision record, or the part of the code that enforces an invariant.
+## The source of truth may be less readable
 
-AI can make those things easier to work with. It can summarize them, compare them, and expose contradictions between them. That is useful work.
+There is something unglamorous about most authoritative sources.
 
-But when the generated explanation disagrees with the owned source, the owned source wins. And when there is no owned source, AI should not fill the gap so smoothly that nobody notices.
+The rule may live in a contract, a policy, a decision record or the code that enforces an invariant. None of these is guaranteed to provide the clearest explanation for a person encountering the system for the first time.
 
-The gap is the information.
+AI can make these artefacts easier to work with. It can summarise them, compare versions and expose contradictions between them.
 
-It tells us that the knowledge has not yet been placed where it belongs.
+The phrase “source of truth” can still make the situation sound cleaner than it is. An owned document can be outdated. A test may preserve an obsolete assumption. Code may behave differently from the published contract.
 
-## Keeping authority visible
+Ownership does not remove those conflicts. It tells us where the conflict must be resolved.
 
-For AI-assisted development, I think this is the rule worth holding onto:
+When sources disagree, AI can show the disagreement and gather the available evidence. It should not settle the domain meaning by choosing whichever interpretation forms the most coherent story. That decision belongs to the people responsible for the context.
 
-A generated explanation may start the conversation. The source of truth must finish it.
+The gap remains useful information. It shows where the system’s knowledge has not yet been made dependable.
 
-That does not mean every team needs more ceremony. Most teams have enough of that already. The point is smaller and more concrete: when AI says something important about the domain, we should know whether it is repeating an owned source, interpreting weak evidence, or guessing.
+## Authority must remain visible
 
-AI can be useful in all of those cases. The important thing is that the status stays visible.
+The rule I want to preserve is simple:
 
-Bounded contexts must still own the meaning.
+A generated explanation may start the conversation. An owned source must finish it.
 
-## Next
+This does not require a new approval process for every paragraph produced with AI. It requires enough discipline to distinguish between what the model found, what it inferred and what the owning context has accepted.
 
-This leads to the next practical issue.
+AI remains useful in each case. The status of the output is what matters.
 
-If bounded contexts own meaning, they need a way to publish some of that meaning to the outside world. Not everything. Not the whole internal model. Only the parts other contexts are allowed to depend on.
+Bounded contexts must still own their meaning.
 
-That is where contracts become more than technical schemas.
+That leaves a practical problem for the next part of this series. A context cannot keep all of that meaning to itself. Other parts of the system need stable facts and rules they are allowed to depend on, without gaining access to the whole internal model.
 
-They become published language.
+Some of that meaning has to be published.
+
+That is where contracts begin to carry more than structure.
