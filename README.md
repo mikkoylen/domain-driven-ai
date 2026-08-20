@@ -48,7 +48,7 @@ The structure may evolve, but the initial shape is:
 ```text
 .
 ├── posts/
-│   └── published and draft blog posts in Markdown
+│   └── published blog posts in Markdown
 │
 ├── notes/
 │   └── rough ideas, outlines, and working thoughts
