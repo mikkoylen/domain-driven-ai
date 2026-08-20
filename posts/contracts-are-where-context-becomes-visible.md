@@ -1,105 +1,125 @@
-# Contracts Are Where Context Becomes Visible
+# Internal, External, and Contract Models Should Not Be the Same Thing
 
-Most writing about bounded contexts pays close attention to what happens inside the boundary. The model should use the language of the domain. Business rules should have a clear home. Concepts that mean different things should be kept apart.
+Discussions about model separation often end up being discussions about boilerplate. One object arrives at a service boundary, most of its fields are copied into another object, and a similar conversion happens again before data leaves the service.
 
-That work matters. I have seen how quickly a system becomes difficult to change when the internal model loses those distinctions.
+I have never particularly enjoyed writing that code. I have also taken the shortcut of using one model throughout an application. In a small or short-lived system, that can be a defensible decision.
 
-I am more interested here in another part of the context: the surface it presents to everyone else.
+The trouble usually appears later.
 
-Other teams do not see the aggregates or the private concepts that make the implementation coherent. They meet an API, a command, an event or a schema. From there, they decide what the context knows and what they can depend on.
+The same class gradually becomes an API request, an event payload, a persistence structure, and the internal representation of the domain. A field cannot be renamed because an external consumer may depend on it. An upstream system introduces a nullable value, so nullability spreads into business logic. Domain objects collect serialisation annotations because they also need to cross a technical boundary.
 
-The contract is where the context becomes visible.
+At first, one model looked simpler. Eventually, every change seemed to affect something it should not.
 
-AI makes that surface more consequential. It can generate clients, handlers, tests and documentation from a contract with very little effort. This is genuinely useful. It also allows unclear language to travel further before anyone notices what is missing.
+This is where I think the usual argument about duplicate fields misses the point. The important difference between these models is not their structure. It is who owns their meaning and why they need to change.
 
-## The boundary is a published model
+## Similar structure hides different responsibilities
 
-Contracts are often treated as technical artefacts. An OpenAPI definition describes HTTP operations. An AsyncAPI schema describes messages. A DTO gives two systems a structure they can both serialise.
+Software models are easy to compare by looking at their names, fields, types, and relationships. When two classes contain nearly the same data, the duplication is obvious. Their different responsibilities are less visible.
 
-All of that is true, but it leaves out the part I have become more interested in.
+Consider a product.
 
-A contract publishes part of the context's understanding. It tells the outside world what the context accepts, what it is prepared to state as true and which concepts it owns. It does not expose the whole domain model. It exposes the part that other contexts are allowed to build on.
+The product context may own descriptions, classifications, lifecycle state, packaging information, and sales restrictions. An ordering context may only need to know whether an item can currently be sold through a particular channel.
 
-Consider an event called `OrderUpdated`.
+Both contexts might use the name `Product`. Their models might share an identifier and a few fields. They still do not represent the same understanding.
 
-The name says that something changed, while avoiding any claim about what is now true. The payload may contain enough fields to reconstruct the answer. The documentation may describe the common cases. The people involved in the original integration may simply remember what they agreed.
+The product context owns the model it uses to manage products. The ordering context owns the smaller interpretation it needs to make ordering decisions.
 
-That can work for a while.
+I have found ownership more useful than structural similarity when deciding whether models should be shared. The relevant questions are who decides what a field means, which decisions the model supports, and what can cause it to change.
 
-Then another consumer arrives. A dashboard starts using the event. A support process depends on one of its fields. Someone points an AI tool at the schema and asks it to create a handler. Each new use gives the vague event a little more authority.
+Two models can look identical today and still need the freedom to become different tomorrow.
 
-The missing distinction may be between an order being confirmed, cancelled, rejected or adjusted. Those are different facts. Consumers can depend on them in different ways. If the contract does not express the distinction, every consumer has to recover it from somewhere else.
+## The internal model needs room to change
 
-The internal model may be precise while the published model remains vague.
+The internal model belongs to the bounded context. It contains the language and rules the context needs to do its work. Its shape should follow the domain rather than an API framework, database library, or message serializer.
 
-## AI lets ambiguity travel further
+I do not see a domain model as a finished description of reality. It is closer to a working theory.
 
-Weak contracts caused problems long before AI. Consumers depended on accidental fields. Internal structures leaked into public APIs. Events became generic change notifications because naming the business fact took more work.
+A team models what it currently understands and builds around it. Later, the work exposes mistakes. A boolean turns out to be the result of a policy. One entity turns out to contain two concepts that happen to share an identifier. A field that once appeared important has no part in an actual business decision.
 
-The friction around those weaknesses used to reveal some of them. A consumer team had to ask what an event meant. Someone writing a client had to inspect the examples. A documentation gap caused a conversation.
+The model should be allowed to follow that learning.
 
-AI can remove much of that friction.
+That becomes harder when external consumers depend on the same structure. An improvement to the internal model becomes a contract change. The team starts preserving concepts that no longer fit because removing them might break somebody else.
 
-When a contract is vague, the model rarely stops at the vague part. It draws intent from names, types, examples, nearby code and whatever documentation happens to be available. The generated result can look more complete than the source material deserves. The code reads well. The tests pass. The explanation sounds settled.
+Transport concerns arrive by the same route. Fields become nullable because an API permits them to be absent. Generated types enter business logic because using them avoids a conversion. Each decision looks harmless on its own.
 
-I find this more worrying than an obvious generation failure. Missing meaning does not necessarily produce broken software. It can produce working software built on an assumption that nobody made explicit.
+Together, they make the internal model describe the history of its integrations instead of the context's current understanding.
 
-A precise contract gives AI a smaller space in which to infer. A vague one still gives it plenty to generate, but much less to justify what it generated.
+## Both sides of a boundary need translation
 
-AI is unusually willing to continue where a human integration discussion might have paused.
+The same problem appears when data enters a context.
 
-## Exported internals weaken the boundary
+A generated API client or event class already contains the required fields, so passing it directly into application and domain logic feels efficient. No local type is needed. No mapping needs to be maintained.
 
-One common shortcut is to generate the external contract directly from the internal model. I understand the appeal. The fields and types already exist. Reusing them avoids mappings and duplicated structures. In a small application, the trade-off may be entirely reasonable.
+It also allows the producer's model to enter the consumer unchanged.
 
-Across bounded contexts, the two models have different responsibilities.
+The producer owns the facts it publishes. It does not own what those facts mean inside another context. That interpretation belongs to the consumer.
 
-The internal model serves the rules and decisions of the owning context. Its language can be rich in places that matter only inside that boundary. It can change as the team learns more about the domain.
+If a customer context publishes a large `CustomerUpdated` event, an ordering context may only care about the customer identifier and whether ordering is currently allowed. Copying the full customer structure does not give the ordering context a better model. It gives it more upstream changes to absorb and more concepts that have no role in ordering.
 
-The contract serves communication across the boundary. It needs to be deliberate about what it reveals, what it hides and what other contexts may rely on. Some internal distinctions are irrelevant outside. Some explanations needed by consumers have no natural place in the internal type.
+A consumer-owned external model can be smaller. It can use local language, combine information from several messages, or reshape an upstream value into something useful for a local decision. This is the anti-corruption layer in a fairly ordinary form: a deliberate translation at the boundary.
 
-Generating one from the other can hide this design decision. The result looks consistent because the same names and structures pass through every layer. It may also expose implementation choices as promises to consumers.
+The contract model has a related but different responsibility. It defines what the context intentionally accepts from or promises to others. A contract may remain stable while the internal implementation changes substantially. It may reveal less than the context knows, or preserve an older representation because compatibility matters more than internal elegance.
 
-AI tooling tends to make direct reuse even more attractive. One schema can become a model, an API and a client with very little visible effort. The saved mapping code is easy to count. The lost freedom at the boundary is harder to see.
+Publishing an internal entity directly makes all of its visible details available for other systems to depend on. A field may be stored by consumers. Its absence may acquire meaning. Its name may enter the language between teams.
 
-Some duplication is the cost of keeping meanings separate.
+Once that happens, it is no longer an implementation detail, even if nobody meant to publish it.
 
-## Commands and events expose ownership
+## Mapping makes hidden decisions visible
 
-Commands and events make the published model easier to see because they speak in different directions.
+Separating models creates mapping code. Sometimes it creates a surprising amount of it.
 
-A command names something the context is willing to be asked to do. `UpdateOrder` leaves most of the intent outside the contract. `ConfirmOrder`, `SelectDeliveryTime` and `CancelOrder` bring more of the business action into the language of the boundary.
+That cost is real. Several identical classes do not improve a design merely because they sit in different packages.
 
-This is useful even when the names are not perfect. The command makes it clearer that the caller is asking the owning context to apply its rules. It is not requesting a direct mutation of someone else's data.
+Still, I have become less convinced that mapping is only boilerplate. A mapping decides what a missing value means. It decides whether an external status maps directly to an internal state or contributes to a policy decision. On the way out, it decides which internal details are part of the promise made to consumers.
 
-An event carries a different claim. It states something the context is prepared to publish as true. `PaymentCaptured` gives a consumer a fact to reason about. `PaymentUpdated` tells the consumer to look elsewhere for the meaning.
+Those decisions exist even when no mapper exists.
 
-Not every event represents a major business milestone. Some distribute data. Others signal progress in a process. Problems begin when those different kinds of messages are made to look interchangeable. A consumer then has to guess whether it has received a durable business fact, a current data snapshot or a notification that more work may follow.
+Without an explicit translation, they tend to hide in deserialisation settings, nullable domain fields, convenience methods, and assumptions scattered through handlers. The code is shorter, but the translation has not disappeared. It has become harder to find.
 
-The contract reveals whether the producing context has made that distinction itself.
+I would rather see that decision in one slightly boring function than discover parts of it across five places in the application.
 
-## A contract should leave less to infer
+Some duplication remains wasteful. If two models have the same owner, express the same meaning, and change for the same reasons, separating them achieves little. But when those conditions differ, repeated fields can be cheaper than shared meaning that nobody quite owns.
 
-Clear contracts do not have to be large. They need enough language to remove the guesses that matter.
+## Separate models narrow the security surface
 
-Names carry part of that work. Examples, constraints and short explanations carry the rest. A timestamp may represent business time or processing time. An event may be emitted before the wider process has finished. Neither distinction is visible from the type alone.
+Model separation also gives security decisions a visible place.
 
-These details are sometimes treated as supporting documentation. I think they belong closer to the contract because they change what the contract means.
+Suppose an internal object gains a field such as `approved`, `riskLevel`, `accountRole`, or `manualReviewRequired`. If the object also serves as an API request, a caller may suddenly be able to provide a value that was intended to be controlled only inside the context.
 
-They also change what AI can reasonably produce from it. A schema with vague names gives a model structure. A schema with ownership, constraints and examples gives it a boundary.
+The value may deserialize correctly. It may even pass format validation. The problem is that the caller should never have been able to set it.
 
-I do not think the answer is a heavy review process. The useful habit is to read a proposed contract as language as well as an integration mechanism. I try to look at what the outside world can now see, what the names appear to promise and which conclusions a consumer could draw without access to the implementation discussion.
+An explicit input contract defines the part of the internal state that external input is allowed to influence. It does not replace validation or authorisation, but it makes the accepted surface deliberate.
 
-Most future consumers will not have been in that discussion. Neither will the AI tool pointed at the repository six months later.
+The same risk exists on the way out. Internal models accumulate information that should remain inside the context: personal data, fraud indicators, operational flags, access decisions, pricing details, or intermediate policy results.
 
-## The visible model deserves care
+When an outbound contract is assembled explicitly, exposing a new field requires a mapping change. When an internal object is serialised directly, exposure can happen as a side effect of an unrelated domain change.
 
-I still care deeply about the model inside a bounded context. Poor internals eventually show up as scattered rules, inconsistent language and changes that take longer than they should.
+Separate models do not make a system secure by themselves. They create a boundary where influence and disclosure can be reviewed.
 
-The contract creates a different kind of consequence. It shapes how other contexts understand the boundary. Those consumers turn its names and structures into their own assumptions. AI now helps them do that faster and at a larger scale.
+## AI makes model separation cheaper
 
-This makes contracts more important in AI-assisted development, although not because schemas have suddenly become architecture. Their meaning has always mattered. What has changed is the speed at which the visible model can be reused and amplified.
+AI-assisted development makes the shortcut easier to take.
 
-A clear contract gives AI something defensible to work from. A vague contract gives it room to invent coherence.
+From the code alone, reuse often looks clean. Similar fields suggest one type. Generated clients already contain the required data. An internal entity can already be serialised. The result has fewer classes, fewer mappings, and fewer tests.
 
-I am still unsure how much meaning belongs directly in a schema and how much needs to live in material around it. The boundary will never explain the whole context. It should at least make clear which parts of the context the outside world is allowed to believe.
+I cannot really blame the tool for following what is visible.
+
+Structural similarity is visible in code. Ownership usually is not. A coding agent cannot infer from field names that one model is an external promise, another is a consumer-owned interpretation, and a third needs to evolve with the domain. It will not know that a new internal field is sensitive unless that constraint appears somewhere it can inspect.
+
+Developers have been collapsing models for decades. AI only makes the choice faster and easier to repeat across a codebase.
+
+It also makes deliberate separation cheaper. Once the responsibility of each model is clear, AI can generate types, mapping functions, validation, conversion tests, and serialisation tests. It can update adapters when a contract changes. Architecture checks can keep generated client types and contract types out of the domain model.
+
+The difficult decisions remain human ones. Structural similarity does not reveal what an external value means inside the domain. It does not decide which fields a caller may influence or which internal details are safe to publish.
+
+The repository therefore needs to make the intended flow visible. Package and module boundaries can distinguish published contracts, consumer-owned external models, and the internal domain. Dependency rules can require translation before information enters or leaves domain logic. Short documentation can explain who owns each model and why it exists.
+
+The exact package names matter less than the rule they make visible.
+
+I still do not like mapping code very much. But AI has weakened the practical argument for avoiding it. The mechanical work has become cheaper, while the cost of accidental coupling and accidental disclosure has not.
+
+That does not mean every service needs three versions of every object. I still do not know where the separation stops being worth its cost. In a small application with one owner and one reason for change, a shared model may be entirely reasonable.
+
+The distinction becomes important when ownership, meaning, security exposure, or reasons for change begin to diverge. At that point, the models should be allowed to diverge too.
+
+AI can help maintain that boundary. It cannot decide that the boundary matters unless the architecture makes the decision visible.
