@@ -1,127 +1,105 @@
 # Contracts Are Where Context Becomes Visible
 
-I have started to think that we sometimes put too much attention on the inside of a bounded context, and too little on the surface where other systems meet it.
+Most writing about bounded contexts pays close attention to what happens inside the boundary. The model should use the language of the domain. Business rules should have a clear home. Concepts that mean different things should be kept apart.
 
-The internal model matters, of course. If the model inside the context is weak, the system will eventually show it. Rules become scattered. Language becomes inconsistent. Changes become harder than they should be.
+That work matters. I have seen how quickly a system becomes difficult to change when the internal model loses those distinctions.
 
-But from the outside, most of that internal work is invisible.
+I am more interested here in another part of the context: the surface it presents to everyone else.
 
-Other teams do not interact with your aggregates. They do not see the private concepts that make your implementation elegant. They do not care much whether the internal code is arranged exactly the way you wanted, as long as the context behaves correctly.
+Other teams do not see the aggregates or the private concepts that make the implementation coherent. They meet an API, a command, an event or a schema. From there, they decide what the context knows and what they can depend on.
 
-What they see is the contract.
+The contract is where the context becomes visible.
 
-They see the API. The command. The event. The schema. The field names. The status values. The examples. The errors. That is where the context becomes visible to the rest of the world.
+AI makes that surface more consequential. It can generate clients, handlers, tests and documentation from a contract with very little effort. This is genuinely useful. It also allows unclear language to travel further before anyone notices what is missing.
 
-That feels more important in the age of AI.
+## The boundary is a published model
 
-AI can generate a lot from a contract. It can create clients, handlers, tests, examples, documentation, mocks, mappings, and explanations. It can help a consumer team move faster without needing to ask the producer team every small question. That is useful.
+Contracts are often treated as technical artefacts. An OpenAPI definition describes HTTP operations. An AsyncAPI schema describes messages. A DTO gives two systems a structure they can both serialise.
 
-But it also means that whatever is unclear in the contract can spread quickly.
+All of that is true, but it leaves out the part I have become more interested in.
 
-## The outside world builds on the surface
+A contract publishes part of the context's understanding. It tells the outside world what the context accepts, what it is prepared to state as true and which concepts it owns. It does not expose the whole domain model. It exposes the part that other contexts are allowed to build on.
 
-A contract is easy to dismiss as a technical artifact. An OpenAPI definition. An AsyncAPI schema. A DTO. A Kafka message format. Something needed so two systems can talk without breaking each other.
+Consider an event called `OrderUpdated`.
 
-That view is not wrong, but it is incomplete.
+The name says that something changed, while avoiding any claim about what is now true. The payload may contain enough fields to reconstruct the answer. The documentation may describe the common cases. The people involved in the original integration may simply remember what they agreed.
 
-A contract is also a published view of the context’s understanding. It says what the context accepts, what it publishes, what it owns, and what other systems are allowed to depend on. It is not the whole domain model, but it is not separate from the domain either.
+That can work for a while.
 
-If a context publishes `OrderUpdated`, it has made a very weak statement to the outside world. Something changed. Maybe the payload has enough fields for a consumer to work it out. Maybe the documentation explains the cases. Maybe everyone remembers the discussion from last month.
+Then another consumer arrives. A dashboard starts using the event. A support process depends on one of its fields. Someone points an AI tool at the schema and asks it to create a handler. Each new use gives the vague event a little more authority.
 
-For a while, that may be enough.
+The missing distinction may be between an order being confirmed, cancelled, rejected or adjusted. Those are different facts. Consumers can depend on them in different ways. If the contract does not express the distinction, every consumer has to recover it from somewhere else.
 
-Then another team consumes the event. A dashboard uses it. A support process starts depending on it. AI is asked to generate a new handler from it. Someone writes documentation based on the schema. Slowly, the vague word becomes part of the system’s shared language.
+The internal model may be precise while the published model remains vague.
 
-The problem is not the word `updated` itself. The problem is that it avoids saying what is now true.
+## AI lets ambiguity travel further
 
-Was the order confirmed? Was payment captured? Was the delivery time selected? Was an item removed? Was the order cancelled by the customer, rejected by the business, or adjusted by an internal process?
+Weak contracts caused problems long before AI. Consumers depended on accidental fields. Internal structures leaked into public APIs. Events became generic change notifications because naming the business fact took more work.
 
-Those are different facts. Different consumers can rely on them in different ways. If the contract does not make that visible, the meaning has to be recovered somewhere else.
+The friction around those weaknesses used to reveal some of them. A consumer team had to ask what an event meant. Someone writing a client had to inspect the examples. A documentation gap caused a conversation.
 
-Usually it is recovered badly.
+AI can remove much of that friction.
 
-## AI reduces the friction around weak contracts
+When a contract is vague, the model rarely stops at the vague part. It draws intent from names, types, examples, nearby code and whatever documentation happens to be available. The generated result can look more complete than the source material deserves. The code reads well. The tests pass. The explanation sounds settled.
 
-Weak contracts were already a problem before AI. Consumers depended on accidental fields. Internal structures leaked into public APIs. Events became generic data notifications. Commands sounded like database updates.
+I find this more worrying than an obvious generation failure. Missing meaning does not necessarily produce broken software. It can produce working software built on an assumption that nobody made explicit.
 
-AI does not create this problem. It removes some of the friction that used to expose it.
+A precise contract gives AI a smaller space in which to infer. A vague one still gives it plenty to generate, but much less to justify what it generated.
 
-If a contract is vague, AI does not necessarily stop. It continues. It infers intent from names, field types, examples, nearby code, and whatever documentation happens to exist. The result can look better than the source material deserves. The code can be readable. The documentation can sound confident. The tests can pass.
+AI is unusually willing to continue where a human integration discussion might have paused.
 
-That is the uncomfortable part. Missing meaning does not always appear as broken software. Sometimes it appears as working software with hidden assumptions.
+## Exported internals weaken the boundary
 
-This is why contracts need more attention now, not less. They are one of the main sources AI will use when it builds around a context. If the contract is precise, AI has a narrower and safer space to work in. If the contract is vague, AI will still work, but it may spread the vagueness into more places.
+One common shortcut is to generate the external contract directly from the internal model. I understand the appeal. The fields and types already exist. Reusing them avoids mappings and duplicated structures. In a small application, the trade-off may be entirely reasonable.
 
-The issue is not that AI misunderstands a good contract. The issue is that AI is too willing to work with a bad one.
+Across bounded contexts, the two models have different responsibilities.
 
-## Contracts are not exported internals
+The internal model serves the rules and decisions of the owning context. Its language can be rich in places that matter only inside that boundary. It can change as the team learns more about the domain.
 
-One tempting shortcut is to generate contracts from internal models and call the job done.
+The contract serves communication across the boundary. It needs to be deliberate about what it reveals, what it hides and what other contexts may rely on. Some internal distinctions are irrelevant outside. Some explanations needed by consumers have no natural place in the internal type.
 
-I understand why that happens. It feels efficient. The data already exists. The fields are already named. The types are already there. Why create another model? Why write mappings? Why duplicate structure?
+Generating one from the other can hide this design decision. The result looks consistent because the same names and structures pass through every layer. It may also expose implementation choices as promises to consumers.
 
-Inside one small application, that may be fine.
+AI tooling tends to make direct reuse even more attractive. One schema can become a model, an API and a client with very little visible effort. The saved mapping code is easy to count. The lost freedom at the boundary is harder to see.
 
-Across bounded contexts, it is more dangerous.
+Some duplication is the cost of keeping meanings separate.
 
-The internal model is designed for the owning context. It should reflect the rules, language, and decisions that make sense inside that boundary. The contract has a different job. It is the part of the model the context deliberately exposes. It should be careful about what it reveals, what it hides, and what it allows others to rely on.
+## Commands and events expose ownership
 
-Those are not the same design problem.
+Commands and events make the published model easier to see because they speak in different directions.
 
-A good internal model can still produce a poor contract if the boundary is treated casually. The outside world does not need every internal distinction. It also may need some external clarity that the internal model does not naturally provide. The contract should be designed for communication across the boundary, not extracted as a side effect of implementation.
+A command names something the context is willing to be asked to do. `UpdateOrder` leaves most of the intent outside the contract. `ConfirmOrder`, `SelectDeliveryTime` and `CancelOrder` bring more of the business action into the language of the boundary.
 
-This is especially important when AI is involved. Generated tools often push toward direct reuse because it is simpler. One schema. One type. One model passed through several layers. Less code. Fewer mappings.
+This is useful even when the names are not perfect. The command makes it clearer that the caller is asking the owning context to apply its rules. It is not requesting a direct mutation of someone else's data.
 
-That can look clean while quietly removing the boundary.
+An event carries a different claim. It states something the context is prepared to publish as true. `PaymentCaptured` gives a consumer a fact to reason about. `PaymentUpdated` tells the consumer to look elsewhere for the meaning.
 
-Some duplication is not waste. Sometimes it is the price of keeping meanings separate.
+Not every event represents a major business milestone. Some distribute data. Others signal progress in a process. Problems begin when those different kinds of messages are made to look interchangeable. A consumer then has to guess whether it has received a durable business fact, a current data snapshot or a notification that more work may follow.
 
-## Commands and events reveal different parts of the context
+The contract reveals whether the producing context has made that distinction itself.
 
-Commands and events are a useful place to see this clearly.
+## A contract should leave less to infer
 
-A command exposes what the context is willing to be asked to do. It is input language. It should express intent, not just mutation.
+Clear contracts do not have to be large. They need enough language to remove the guesses that matter.
 
-`UpdateOrder` is usually too broad. It sounds flexible, but often that flexibility means the real business action has not been named yet. `ConfirmOrder`, `SelectDeliveryTime`, `CancelOrder`, or `ApplyRefund` may still need refinement, but they push the conversation closer to the domain.
+Names carry part of that work. Examples, constraints and short explanations carry the rest. A timestamp may represent business time or processing time. An event may be emitted before the wider process has finished. Neither distinction is visible from the type alone.
 
-They also say something important about ownership. A command is not a request to change someone else’s data directly. It is a request for the owning context to apply its own rules.
+These details are sometimes treated as supporting documentation. I think they belong closer to the contract because they change what the contract means.
 
-Events expose a different kind of language. An event says what the context is prepared to publish as true.
+They also change what AI can reasonably produce from it. A schema with vague names gives a model structure. A schema with ownership, constraints and examples gives it a boundary.
 
-That difference matters. `PaymentCaptured` is not the same kind of statement as `PaymentUpdated`. `DeliveryTimeSelected` is not the same kind of statement as `OrderChanged`.
+I do not think the answer is a heavy review process. The useful habit is to read a proposed contract as language as well as an integration mechanism. I try to look at what the outside world can now see, what the names appear to promise and which conclusions a consumer could draw without access to the implementation discussion.
 
-An event should give consumers something they can reason about. Not everything about the internal process. Not a dump of all fields that changed. A fact the context owns.
+Most future consumers will not have been in that discussion. Neither will the AI tool pointed at the repository six months later.
 
-This does not mean all events must be grand business milestones. Some events are simple. Some mostly distribute data. But even then, the contract should be honest about what kind of event it is. A data update, a business fact, and a process notification should not all look like the same generic message with a different name.
+## The visible model deserves care
 
-Consumers should not have to guess what kind of truth they are receiving.
+I still care deeply about the model inside a bounded context. Poor internals eventually show up as scattered rules, inconsistent language and changes that take longer than they should.
 
-## The contract should reduce guessing
+The contract creates a different kind of consequence. It shapes how other contexts understand the boundary. Those consumers turn its names and structures into their own assumptions. AI now helps them do that faster and at a larger scale.
 
-A good contract does not need to be long. It does need to reduce avoidable guessing.
+This makes contracts more important in AI-assisted development, although not because schemas have suddenly become architecture. Their meaning has always mattered. What has changed is the speed at which the visible model can be reused and amplified.
 
-Names matter. Examples matter. Constraints matter. Short notes matter. If a timestamp means business time rather than processing time, say so. If a status is only informational and should not drive consumer behavior, say so. If an event is emitted before the whole process is complete, say so. If a command is idempotent, say what that means in practice.
+A clear contract gives AI something defensible to work from. A vague contract gives it room to invent coherence.
 
-This is not documentation decoration. It is part of the contract.
-
-AI makes this more obvious because the contract becomes prompt material whether we intend it or not. A schema with vague names gives AI structure. A schema with clear language, examples, ownership, and constraints gives it a better boundary.
-
-I do not think this requires a heavy process. It is more of a review habit.
-
-When a contract changes, read it once as an integration artifact and once as language. Ask what the outside world can now see. Ask what the name claims. Ask what consumers are allowed to believe. Ask whether the contract exposes a domain fact or only leaks internal movement. Ask whether someone who was not in the implementation discussion would understand what the context is saying.
-
-That last question is useful because most future readers will not have been in the discussion. Neither will the AI tools pointed at the repository six months later.
-
-## The visible part deserves more care
-
-I still care deeply about the internal model. A bounded context with poor internals will not stay healthy for long.
-
-But the contract is where the context meets the world. It is where other teams form their understanding. It is where consumers build their assumptions. It is where AI tools will often start when asked to generate something useful around the system.
-
-That makes contracts one of the most important design artifacts in AI-assisted development.
-
-Not because contracts are new. Not because schemas suddenly became architecture. But because the visible part of the context now gets reused, interpreted, and amplified faster than before.
-
-If the context speaks clearly through its contracts, AI can help others work with it more safely.
-
-If the contract is vague, AI will not fix the missing meaning. It will help us spread it.
+I am still unsure how much meaning belongs directly in a schema and how much needs to live in material around it. The boundary will never explain the whole context. It should at least make clear which parts of the context the outside world is allowed to believe.
